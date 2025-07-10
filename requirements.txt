@@ -1,12 +1,5 @@
 streamlit
 opencv-python-headless==4.9.0.80
-
-# Ensure libGL.so.1 is available
-# This adds OpenGL libraries at OS level
-# Required for cv2 (OpenCV) to work
-apt.txt
-
-
 torch
 torchvision
 torchmetrics
@@ -21,4 +14,3 @@ streamlit_cropper
 shapely
 gdown
 git+https://github.com/jacobgil/pytorch-grad-cam.git
-
