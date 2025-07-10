@@ -21,7 +21,7 @@ from feedback_logger import log_feedback
 
 from model import SimpleModel
 
-
+REQUIRE_SINGLE_EAGLE = False      # False ➜ accept first mask regardless
 # Load config from YAML file
 with open('config-local-artportalen.yml', 'r') as file:
     config = yaml.safe_load(file)
@@ -114,17 +114,6 @@ except Exception as e:
 
 yolo_model = load_yolo_model()
 
-def get_segmentation_mask(image: Image.Image, yolo_model):
-    try:
-        results = yolo_model(image)
-        if results[0].masks is not None:
-            mask = results[0].masks.data[0].cpu().numpy()
-            mask = (mask > 0.5).astype(np.uint8)
-            return mask
-        else:
-            return None
-    except Exception as e:
-        return None
 
 if file is None:
     st.text("Please upload an image file")
@@ -137,19 +126,29 @@ else:
         st.error(f"Error loading image: {e}")
         st.stop()
 
-    # Run YOLOv8 segmentation with loading spinner
-    with st.spinner("Running YOLO segmentation..."):
+    # Run YOLO segmentation with loading spinner
+    with st.spinner("Running YOLO segmentation…"):
         results = yolo_model(image)
-        n_objects = len(results[0].boxes) if results[0].boxes is not None else 0
-        mask = None
-        if results[0].masks is not None and n_objects == 1:
-            mask = results[0].masks.data[0].cpu().numpy()
-            mask = (mask > 0.5).astype(np.uint8)
 
-    # Check if YOLO succeeded (found exactly one object with mask)
-    yolo_success = mask is not None
-    
-    if yolo_success:
+    # Collect masks & object count
+    masks = results[0].masks.data if results[0].masks is not None else None
+    n_objects = len(results[0].boxes) if results[0].boxes is not None else 0
+
+    # Decide which mask to use
+    mask = None
+    if masks is not None:
+        if REQUIRE_SINGLE_EAGLE:
+            # Only proceed if YOLO found exactly one eagle
+            if n_objects == 1:
+                mask = masks[0].cpu().numpy() > 0.5
+        else:
+            # Always take the first mask, even if YOLO found several
+            mask = masks[0].cpu().numpy() > 0.5
+            if n_objects > 1:
+                st.info(f"YOLO detected {n_objects} eagles – using the first one automatically.")
+
+    # ── ──Segmentation Success path ──────────────────────────────────────────────
+    if mask is not None:
         # Resize mask to match image size
         with st.spinner("Processing mask..."):
             mask_resized = Image.fromarray(mask * 255).resize(image.size, resample=Image.NEAREST)
@@ -202,8 +201,15 @@ else:
                 full_reset()
 
     
+    # ──Segmentation Failure path ──────────────────────────────────────────────
     else:
-        st.warning(f"YOLO detected {n_objects} objects. Please crop the image to the eagle of interest.")
+        if REQUIRE_SINGLE_EAGLE:
+            # Your existing cropper UI goes here
+            st.warning("YOLO found no single-eagle mask – please crop.")
+            # (paste the whole cropper code block)
+        else:
+            st.error("YOLO produced no masks; cannot continue.")
+
         
         # Initialize session state variables
         if 'show_cropper' not in st.session_state:
