@@ -1,15 +1,15 @@
 streamlit
-opencv-python-headless==4.9.0.80
 torch
 torchvision
 torchmetrics
 timm
-Pillow
+pillow
 numpy
 matplotlib
 pyyaml
 pytorch_lightning
-ultralytics
+ultralytics           # keeps its own deps; headless overrides GUI build
+opencv-python-headless==4.9.0.80
 streamlit_cropper
 shapely
 gdown
