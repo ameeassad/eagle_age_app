@@ -1,0 +1,80 @@
+# BEFORE RUN, CHECK: cache_path, splitter, precompute, epochs, loss hyperparams for lvl
+
+project_name: eagle-ageclassifier
+notes: Transformer-based age classification with 5 classes
+use_wandb: True
+wandb_entity: winniethepooh
+
+wildlife_name: artportalen
+animal_cat: bird
+outdir: results
+dataset: /Users/amee/Documents/code/master-thesis/datasets/artportalen_goeag
+cache_path: /Users/amee/Documents/code/master-thesis/AgeClassifier/annot/final_train_sep_sightings.csv
+cache_dir: /Users/amee/Documents/code/master-thesis/EagleID/dataset/artportalen_cache
+splitter: custom_closed # custom_closed / metadata_split 
+split_ratio: 0.8
+
+only_cache: True # if only_cache, will not run mmpose inference / segmentation and will only use cache results
+precompute: False
+
+model_architecture: SimpleModel # SimpleModel, AgeModel
+backbone_name: resnet50
+checkpoint: 
+preprocess_lvl: 2 # 0: no preprocess, 1: bbox, 2: mask, 3: skeleton, 4: components, 5: heatmaps
+
+batch_size: 64 # Smaller batch size for transformer models
+img_size: 256 # 224 for swin models, 384 for larger models
+epochs: 100
+save_interval: 10
+n_gpu: 1
+num_workers: 4
+gpu_ids: 
+seed: 42 #42, 1234, 7, 2025
+
+use_gradcam: False
+val_viz: False
+
+transforms:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
+  use_advanced_aug: False
+classic_transform: False
+
+# Age classification specific settings
+num_classes: 5 # 5 age classes
+
+# Optimized classifier hyperparameters for 5 classes
+classifier:
+  use_coral: False
+  dropout_rate1: 0.1  # Reduced dropout for simpler head
+  hidden_dim: 256     # Smaller hidden dimension for 5 classes
+  label_smoothing: 0
+
+early_stopping:
+  enabled: False
+  monitor: val/loss
+  min_delta: 0.01
+  patience: 15
+  verbose: true
+  mode: min
+
+solver:
+  OPT: adamw  # adamw for transformers
+  WEIGHT_DECAY: 0.01 # Higher weight decay for transformers
+  MOMENTUM: 0.9  # only when OPT is sgd
+  BASE_LR: 0.0003 
+  LR_SCHEDULER: cosine_annealing  # step, multistep, reduce_on_plateau, cosine_annealing
+  LR_DECAY_RATE: 0.1
+  LR_STEP_SIZE: 10  # only when LR_SCHEDULER is step
+  LR_STEP_MILESTONES: [30, 50, 70]  # only when LR_SCHEDULER is multistep
+  
+  use_swa: False #Stochastic Weight Averaging (SWA) to help improve generalization
+  swa_lr: 0.035
+  swa_start: 24
+  lr_max: 0.0001
+  lr_start: 1e-06
+  lr_ramp_ep: 0
+
+re_ranking: False 
+arcface_loss:
+  activate: False
