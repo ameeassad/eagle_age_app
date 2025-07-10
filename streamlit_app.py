@@ -147,7 +147,7 @@ else:
             # Always take the first mask, even if YOLO found several
             mask = (masks[0].cpu().numpy() > 0.5).astype(np.uint8)
             if n_objects > 1:
-                st.info(f"YOLO detected {n_objects} eagles – using the first one automatically.")
+                st.info(f"YOLO detected {n_objects} objects – using the first one automatically.")
 
     # ── ──Segmentation Success path ──────────────────────────────────────────────
     if mask is not None:
