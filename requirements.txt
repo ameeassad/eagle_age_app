@@ -11,8 +11,6 @@ pytorch_lightning
 ultralytics
 streamlit_cropper
 opencv-python-headless
-ultralytics
-opencv-python-headless
 shapely
 gdown
 git+https://github.com/jacobgil/pytorch-grad-cam.git
