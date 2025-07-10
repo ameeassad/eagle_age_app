@@ -22,6 +22,8 @@ from feedback_logger import log_feedback
 from model import SimpleModel
 
 REQUIRE_SINGLE_EAGLE = False      # False ➜ accept first mask regardless
+FEEDBACK_ENABLED     = False   # set to False to hide / skip feedback
+
 # Load config from YAML file
 with open('config-local-artportalen.yml', 'r') as file:
     config = yaml.safe_load(file)
@@ -178,23 +180,24 @@ else:
         if st.session_state.get("classification_done", False):
             st.image(st.session_state["gradcam_img"], caption=f"GradCAM Visualization - Predicted Age: {label_mapping[st.session_state['pred']]}", use_container_width=True)
             st.write(f"**Predicted Age Group: {label_mapping[st.session_state['pred']]}**")
-            # Feedback section
-            st.write("---")
-            st.write("**Was this prediction correct?**")
-            if not st.session_state.get("feedback_given", False):
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    if st.button("✅ Correct", key="correct_1"):
-                        st.session_state["pending_feedback"] = ("correct", file.name if file else None)
+            if FEEDBACK_ENABLED:
+                # Feedback section
+                st.write("---")
+                st.write("**Was this prediction correct?**")
+                if not st.session_state.get("feedback_given", False):
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        if st.button("✅ Correct", key="correct_1"):
+                            st.session_state["pending_feedback"] = ("correct", file.name if file else None)
 
-                with col2:
-                    if st.button("❌ Incorrect", key="incorrect_1"):
-                        st.session_state["pending_feedback"] = ("incorrect", file.name if file else None)
-                with col3:
-                    if st.button("❓ Unsure", key="unsure_1"):
-                        st.session_state["pending_feedback"] = ("unsure", file.name if file else None)
-            else:
-                st.success("Thank you for your feedback!")
+                    with col2:
+                        if st.button("❌ Incorrect", key="incorrect_1"):
+                            st.session_state["pending_feedback"] = ("incorrect", file.name if file else None)
+                    with col3:
+                        if st.button("❓ Unsure", key="unsure_1"):
+                            st.session_state["pending_feedback"] = ("unsure", file.name if file else None)
+                else:
+                    st.success("Thank you for your feedback!")
             # Start Over button
             st.write("---")
             if st.button("🔄 Start Over", key="start_over_1"):
@@ -315,7 +318,7 @@ else:
 
 
 # Handle deferred feedback logging (should run after all UI)
-if "pending_feedback" in st.session_state:
+if FEEDBACK_ENABLED and "pending_feedback" in st.session_state:
     feedback_type, image_name = st.session_state["pending_feedback"]
     log_feedback(label_mapping[st.session_state['pred']], feedback_type, image_name)
     st.session_state["feedback_given"] = True
