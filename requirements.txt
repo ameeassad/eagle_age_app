@@ -1,14 +1,14 @@
 streamlit
+numpy==1.26.4 
 torch
 torchvision
 torchmetrics
 timm
 pillow
-numpy
 matplotlib
 pyyaml
 pytorch_lightning
-ultralytics           # keeps its own deps; headless overrides GUI build
+ultralytics
 opencv-python-headless==4.9.0.80
 streamlit_cropper
 shapely
