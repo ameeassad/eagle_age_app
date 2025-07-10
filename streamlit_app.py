@@ -51,7 +51,7 @@ def load_yolo_model():
 @st.cache_resource
 def load_classifier_model():
     model_path = "model.ckpt"
-    file_id = "YOUR_FILE_ID"  #
+    file_id = "1V6QpPNxaYAymii7Sc2OY1QX47pU80-iN"  #
     if not os.path.exists(model_path):
         url = f"https://drive.google.com/uc?id={file_id}"
         gdown.download(url, model_path, quiet=False)
@@ -91,7 +91,7 @@ def full_reset():
 
 # Sidebar content
 with st.sidebar:
-    st.title("Golden Eagle of Sweden \n AI Age Prediction")
+    st.title("Golden Eagle AI Age Prediction Tool")
     st.subheader("Upload any image of a golden eagle to predict its age. The model is trained on images of golden eagles from the Swedish Artportalen database.")
 
 # Unique key to control uploader state
