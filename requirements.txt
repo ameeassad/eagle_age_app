@@ -12,7 +12,7 @@ ultralytics
 streamlit_cropper
 opencv-python-headless
 ultralytics
-cv2
+opencv-python-headless
 shapely
 gdown
 git+https://github.com/jacobgil/pytorch-grad-cam.git
